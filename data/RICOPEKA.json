@@ -1,1 +1,94 @@
-{}
+import json
+import os
+
+def load_character_data(json_path="RICOPEKA_with_Bluefish.json"):
+    if not os.path.exists(json_path):
+        raise FileNotFoundError(f"Character file not found: {json_path}")
+    with open(json_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    return data.get("characters", {})
+
+def build_character_description(character_data, pose=None, expression=None):
+    lines = []
+
+    species = character_data.get("species", "")
+    height = character_data.get("height", "")
+    base_desc = f"{species}, {height}" if height else species
+    lines.append(base_desc)
+
+    # anatomy / build
+    anatomy = character_data.get("anatomy") or {}
+    build = character_data.get("build")
+    if build:
+        lines.append(build)
+    if "head" in anatomy:
+        lines.append(f"head: {anatomy['head']}")
+    if "body" in anatomy:
+        lines.append(f"body: {anatomy['body']}")
+    if "tail" in anatomy:
+        lines.append(f"tail: {anatomy['tail']}")
+
+    # accessories
+    accessories = character_data.get("accessories")
+    if accessories:
+        if isinstance(accessories, dict):
+            for item in accessories.values():
+                lines.append(str(item))
+        elif isinstance(accessories, list):
+            lines.extend(accessories)
+
+    # colors
+    colors = character_data.get("color_palette", {}).get("fur_color", {})
+    if colors:
+        color_str = ', '.join([f"{k}: {v}" for k, v in colors.items()])
+        lines.append(f"colors: {color_str}")
+
+    # pose and expression
+    pose_expr = character_data.get("poses_and_expressions", {})
+    if pose and pose_expr.get("primary_pose"):
+        lines.append(f"pose: {pose_expr['primary_pose']}")
+    if expression and pose_expr.get("expressions"):
+        expressions = pose_expr.get("expressions", [])
+        if expression in expressions:
+            lines.append(f"expression: {expression}")
+        else:
+            lines.append(f"expression: {expressions[0]}")  # fallback
+
+    return ', '.join(lines)
+
+def generate_midjourney_prompts(content_idea, character_description=None, series_name=None):
+    prompts = []
+    character_text = f", featuring {character_description}" if character_description else ""
+    series_tag = f" --style {series_name}" if series_name else ""
+
+    prompt1 = (
+        f"{content_idea}{character_text}, cinematic wide shot, lone figure in a vast desert landscape, soft golden hour lighting, warm tones, dramatic shadows, "
+        f"stylized realism, 16:9 aspect ratio, ultra-detailed environment, ambient dust, sunlit sky, volumetric lighting, centered composition{series_tag} --v 5 --ar 16:9 --q 2"
+    )
+    prompts.append(prompt1)
+
+    prompt2 = (
+        f"{content_idea}{character_text}, urban alleyway at night, neon reflections on wet pavement, dynamic close-up of movement, futuristic cyberpunk mood, "
+        f"vivid color palette with magenta and teal, shallow depth of field, cinematic realism, moody lighting{series_tag} --v 5 --ar 16:9 --q 2"
+    )
+    prompts.append(prompt2)
+
+    return prompts
+
+# Example usage
+if __name__ == "__main__":
+    content_idea = "meerkat duo solving a mystery"
+    character_name = "PEKA"
+    pose = True
+    expression = "Mischievous smirk"
+    series = "RICOPEKA"
+
+    all_characters = load_character_data()
+    if character_name in all_characters:
+        char_desc = build_character_description(all_characters[character_name], pose=pose, expression=expression)
+    else:
+        char_desc = None
+
+    prompts = generate_midjourney_prompts(content_idea, char_desc, series)
+    for i, prompt in enumerate(prompts, 1):
+        print(f"\nPrompt {i}:\n{prompt}")
