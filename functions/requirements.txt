@@ -1,0 +1,7 @@
+flask
+functions-framework
+openai
+google-cloud-firestore
+gspread
+oauth2client
+google-cloud-secret-manager
