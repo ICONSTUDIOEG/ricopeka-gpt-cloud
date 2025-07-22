@@ -34,4 +34,4 @@ jobs:
             --allow-unauthenticated \
             --entry-point ricopeka_ai \
             --source ./functions \
-            --region us-central1
+            --region us-central1 
