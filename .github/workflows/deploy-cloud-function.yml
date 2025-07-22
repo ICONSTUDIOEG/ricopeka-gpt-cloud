@@ -16,8 +16,8 @@ jobs:
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
         with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ secrets.supple-bank-465310-p7 }}
+          service_account_key: ${{ secrets.supple-bank-465310-p7 }}
           export_default_credentials: true
 
       - name: Authenticate with Google Cloud
@@ -34,4 +34,4 @@ jobs:
             --allow-unauthenticated \
             --entry-point ricopeka_ai \
             --source ./functions \
-            --region us-central1 
+            --region us-central1
