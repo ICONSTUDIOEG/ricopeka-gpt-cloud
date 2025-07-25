@@ -19,10 +19,9 @@ jobs:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           export_default_credentials: false
 
-      - name: Decode service account key
+      - name: Decode service account key (base64)
         run: |
-          echo "${{ secrets.GCP_SA_KEY }}" > key_base64.txt
-          base64 -d key_base64.txt > "${HOME}/gcloud-key.json"
+          echo "${{ secrets.GCP_SA_KEY }}" | base64 --decode > "${HOME}/gcloud-key.json"
 
       - name: Authenticate with Google Cloud
         run: |
@@ -37,4 +36,6 @@ jobs:
             --allow-unauthenticated \
             --entry-point ricopeka_ai \
             --source ./functions \
-            --region us-central1
+            --region us-central1 \
+            --project ${{ secrets.GCP_PROJECT_ID }} \
+            --verbosity debug  # Enable detailed logs
